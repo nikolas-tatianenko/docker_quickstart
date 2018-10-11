@@ -1,0 +1,48 @@
+version: '3.1'
+
+services:
+  web:
+    #build: ./docker/dockerfiles/php/php7.0
+    image: php:7.2-apache
+#    links:
+#      - database_container:db
+    ports:
+      - ${WEB_PORT}:80
+      #- 4443:443
+    volumes:
+      # Step 1: put code in docroot.
+      # Default : - ./docroot:/var/www/html look .env file to change this.
+      - ${APP_PATH_HOST}:${APP_PATH_CONTAINER}
+    working_dir: ${APP_PATH_CONTAINER}
+  database_container:
+    image: mysql:5.7
+    environment:
+      # Default database and password.
+      MYSQL_DATABASE: drupal
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - ${DATABASE_PORT}:3306
+    volumes:
+       - ./data/mysql/init:/docker-entrypoint-initdb.d # Place .sql files here to upload them to the
+       #- ${DB_PATH_HOST}:/var/lib/mysql # Store Data in folder.
+      #- ./dockerfiles/mysql/mysql.conf.d:/etc/mysql/conf.d #Configurations
+      #- ./data/mysql/data:/var/lib/mysql #If you want to hold data after container removal | doesn't work at Windows.
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - database_container:db
+    ports:
+      - ${DATABASE_MANAGER_PORT}:80
+    environment:
+      PMA_USER: root
+      PMA_PASSWORD: root
+      PHP_UPLOAD_MAX_FILESIZE: 2G
+      PHP_MAX_INPUT_VARS: 1G
+  drush:
+      image: drush/drush:7
+      working_dir: ${APP_PATH_CONTAINER}
+      volumes:
+        - ./data/public_html/docroot:/var/www/html
+      links:
+        - database_container:db
+        - web
