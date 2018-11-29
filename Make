@@ -1,0 +1,20 @@
+include .env
+
+.PHONY: up down stop prune ps shell drush logs
+
+default: up
+
+DRUPAL_ROOT ?= /var/www/html/web
+
+up:
+	@echo "Starting up containers for $(PROJECT_NAME)..."
+	docker-compose pull
+	docker-compose up -d --remove-orphans
+
+projects:
+	@echo "Web       |  http://$(PROJECT_BASE_URL)"
+	@echo "Traefic   |  http://$(PROJECT_BASE_URL):8080"
+	@echo "PMA       |  http://pma.$(PROJECT_BASE_URL)"
+	@echo "mailhog   |  http://mailhog.$(PROJECT_BASE_URL)"
+	@echo "Portainer |  http://portainer.$(PROJECT_BASE_URL)"
+	@echo "PMA       |  http://$(PROJECT_BASE_URL):8080"
