@@ -14,6 +14,8 @@ services:
       # Default : - ./docroot:/var/www/html look .env file to change this.
       - ${APP_PATH_HOST}:${APP_PATH_CONTAINER}
     working_dir: ${APP_PATH_CONTAINER}
+
+###DB###
   database_container:
     image: mysql:5.7
     environment:
@@ -27,6 +29,8 @@ services:
        #- ${DB_PATH_HOST}:/var/lib/mysql # Store Data in folder.
       #- ./dockerfiles/mysql/mysql.conf.d:/etc/mysql/conf.d #Configurations
       #- ./data/mysql/data:/var/lib/mysql #If you want to hold data after container removal | doesn't work at Windows.
+
+###PHPMYADMIN#####
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     links:
@@ -38,6 +42,8 @@ services:
       PMA_PASSWORD: root
       PHP_UPLOAD_MAX_FILESIZE: 2G
       PHP_MAX_INPUT_VARS: 1G
+
+###Drush###
   drush:
       image: drush/drush:7
       working_dir: ${APP_PATH_CONTAINER}
@@ -46,3 +52,26 @@ services:
       links:
         - database_container:db
         - web
+
+###Portainer####
+  portainer:
+    image: portainer/portainer
+    container_name: "${PROJECT_NAME}_portainer"
+    command: --no-auth -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - 'traefik.backend=portainer'
+      - 'traefik.port=9000'
+      - 'traefik.frontend.rule=Host:portainer.${PROJECT_BASE_URL}'
+
+###Traefik###
+  traefik:
+    image: traefik
+    container_name: "${PROJECT_NAME}_traefik"
+    command: -c /dev/null --web --docker --logLevel=INFO
+    ports:
+      - '80:80'  # Port for all other containers if not set manually in label "traefik.port"
+      - '8080:8080' # Dashboard
+    volumes:
+      - /var
