@@ -18,3 +18,9 @@ projects:
 	@echo "mailhog   |  http://mailhog.$(PROJECT_BASE_URL)"
 	@echo "Portainer |  http://portainer.$(PROJECT_BASE_URL)"
 	@echo "PMA       |  http://$(PROJECT_BASE_URL):8080"
+
+# Install docker on clean linux.
+install-docker:
+	@echo "Install docker on clear Linux systems"
+	curl -fsSL https://test.docker.com -o test-docker.sh
+	sh test-docker.sh
